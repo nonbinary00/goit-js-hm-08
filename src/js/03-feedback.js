@@ -1,51 +1,49 @@
 import throttle from 'lodash.throttle';
 
 const { form, email, message } = {
-    form: document.querySelector('.feedback-form'),
-    email: document.querySelector('input'),
-    message: document.querySelector('textarea'),
+  form: document.querySelector('.feedback-form'),
+  email: document.querySelector('input'),
+  message: document.querySelector('textarea'),
 };
+
 
 const FEEDBACK_KEY = 'feedback-form-state';
-
 const storageObject = {};
 
-//Функция для сохранения входных данных в локальном хранилище
-const onInputStoreData = function (e) {
-  storageObject[e.target.name] = e.target.value;
-  localStorage.setItem('feedback-form-state', JSON.stringify(storageObject));
-};
+// прослушиватель событий с throttle для вывода формы
 
-//Прослушиватель событий с throttle для ввода формы
-form.addEventListener('input', throttle(onInputStoreData, 500));
+form.addEventListener('input', throttle(onInputEmail, 500));
+form.addEventListener('submit', onSubmitMessage);
 
-//Проверка локального хранилища и добавление данных во входные данные при перезагрузке
-const getStorageObject = localStorage.getItem('feedback-form-state');
-const parsed = JSON.parse(getStorageObject);
+// функция для сброса формы удаления данных локального хранилища и входа в текущие данные консоли
 
-if (getStorageObject !== null) {
-  if (parsed.email) {
-    email.value = parsed.email;
+function onSubmitMessage(e) {
+  // e.preventDefault();
+  if (!storageObject.email || !storageObject.message) {
+    return alert('all fields');
   }
-  if (parsed.message) {
-    message.value = parsed.message;
+  e.currentTarget.reset();
+  localStorage.removeItem(FEEDBACK_KEY);
+}
+// проверка локального хранилища и добавление данных во входные данные приперезагрузке
+function onInputEmail(e) {
+  storageObject[e.target.name] = e.target.value.trim();
+  localStorage.setItem(FEEDBACK_KEY, JSON.stringify(storageObject));
+}
+
+function saveMessage(e) {
+  const messageToDom = localStorage.getItem(FEEDBACK_KEY);
+  const parsedMessage = JSON.parse(messageToDom);
+  if (parsedMessage) {
+    if (parsedMessage.email) {
+      email.value = parsedMessage.email;
+      storageObject.email = parsedMessage.email;
+    }
+    if (parsedMessage.message) {
+      message.value = parsedMessage.message;
+      storageObject.message = parsedMessage.message;
+    }
   }
 }
 
-//Функция отправки для сброса формы, удаления данных локального хранилища и входа в текущие данные консоли
-form.addEventListener('submit', e => {
-    e.preventDefault();
-    const submitParsed = JSON.parse(localStorage.getItem('feedback-form-state'));
-    console.log('This is current data from Local Storage', submitParsed);
-  
-    localStorage.removeItem('feedback-form-state');
-  
-    const currentData = {
-      email: email.value,
-      message: message.value,
-    };
-  
-    console.log('This is current data from form', currentData);
-  
-    form.reset();
-  });
+saveMessage();
