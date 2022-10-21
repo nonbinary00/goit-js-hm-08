@@ -18,13 +18,19 @@ form.addEventListener('submit', onSubmitMessage);
 // функция для сброса формы удаления данных локального хранилища и входа в текущие данные консоли
 
 function onSubmitMessage(e) {
-  // e.preventDefault();
+  
+  e.preventDefault();
+  
   if (!storageObject.email || !storageObject.message) {
     return alert('all fields');
   }
   e.currentTarget.reset();
   localStorage.removeItem(FEEDBACK_KEY);
+  console.log(storageObject);
 }
+
+// console.log(storageObject);
+
 // проверка локального хранилища и добавление данных во входные данные приперезагрузке
 function onInputEmail(e) {
   storageObject[e.target.name] = e.target.value.trim();
